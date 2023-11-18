@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="the_weather",
-    version="1.4.4",
+    name="google_trendy",
+    version="1.0",
     author="Michael Mondoro",
     author_email="michaelmondoro@gmail.com",
-    description="Package for getting weather data based on a zipcode",
+    description="Package for getting and analyzing tending Google searches",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/michaelMondoro/the_weather",

@@ -1,6 +1,5 @@
 import json
 import requests 
-from pprint import pprint 
 from datetime import datetime
 
 explore_url = "https://trends.google.com/trends/explore?q=/m/02bh_v&date=now+7-d&geo=US"
