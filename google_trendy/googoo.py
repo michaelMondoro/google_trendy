@@ -103,9 +103,3 @@ class GoogleTrends():
     def get_trend(self, id):
         json_data = self._request(self.trend_url(id), f"ERROR getting trend {id}")
         return Trend(id, json_data)
-
-
-tracker = GoogleTrends()
-tracker.get_trends(10)
-for trend in tracker.trends:
-    print(trend.title)
