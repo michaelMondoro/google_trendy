@@ -1,7 +1,7 @@
 [![Generic badge](https://img.shields.io/badge/Licence-MIT-blue.svg)](https://shields.io/)
 [![Generic badge](https://img.shields.io/badge/Maintained-yes-green.svg)](https://shields.io/)
 [![Generic badge](https://img.shields.io/badge/Python-3.10-yellow.svg)](https://shields.io/)
-
+[![Generic badge](https://img.shields.io/badge/the_weather-1.4.3-red.svg)](https://pypi.org/project/google-trendy/)
 
 ## Package
 Package for getting and analyzing tending Google searches
