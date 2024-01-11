@@ -98,6 +98,8 @@ class GoogleTrends():
             self.trends.append(trend)
             self.entities = self.entities.union(set(trend.entities))
         
+        self.trends.sort(key=lambda x: x.timeseries_data['article_count'], reverse=True)
+        
     def get_trend(self, id):
         json_data = self._request(self.trend_url(id), f"ERROR getting trend {id}")
         return Trend(id, json_data)
