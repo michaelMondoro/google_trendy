@@ -9,12 +9,10 @@ class Trend():
     def __init__(self, id, trend_data):
         self.id = id 
         self.title = trend_data['title']
-        self.explore_links = trend_data['entityExploreLinks']
+        self.explore_links = ["https://trends.google.com" + link for link in trend_data['entityExploreLinks']]
         self.entities = trend_data['entityNames']
         self.time_range = trend_data['timeRange']
         self.articles = self.get_articles(trend_data)
-        
-        
 
         self.timeseries_data = self.get_bar_data(trend_data)
 
@@ -90,7 +88,7 @@ class GoogleTrends():
 
     def get_trends(self, num):
         json_data = self._request(f"https://trends.google.com/trends/api/realtimetrends?hl=en-US&tz=300&cat=all&fi=0&fs=0&geo=US&ri={num}&rs={num}&sort=0", "ERROR initiating trend search")
-        
+        self.trends = []
         # This only grabs top stories? Doesn't include the full 'num' requested
         # for trend in json_data['storySummaries']['trendingStories']:
         #     self.trends.append(self.get_trend(trend['id']))
