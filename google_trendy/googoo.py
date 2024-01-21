@@ -1,11 +1,13 @@
 import json
 import requests 
 from datetime import datetime
+import bs4 as bs
 
 explore_url = "https://trends.google.com/trends/explore?q=/m/02bh_v&date=now+7-d&geo=US"
 search_url = "https://trends.google.com/trends/api/realtimetrends?hl=en-US&tz=300&cat=all&fi=0&fs=0&geo=US&ri=10&rs=10&sort=0"
+daily_trend_url = "https://trends.google.com/trends/trendingsearches/daily/rss?geo=US"
 
-class Trend():
+class RealtimeTrend():
     def __init__(self, id, trend_data):
         self.id = id 
         self.title = trend_data['title']
@@ -61,7 +63,24 @@ class Article():
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=False, indent=4)
+'''
+Daily Google Search Trend
+'''
+class DailyTrend:
+    def __init__(self, title, traffic, desc=None, link=None):
+        self.title = title
+        self.desc = desc
+        self.link = link
+        self.traffic = int(traffic.strip("+").replace(",",""))
+    
+    def __str__(self):
+        return f"DailyTrend(title={self.title}, traffic={self.traffic:,}, link={self.link})"
+    def __repr__(self):
+        return f"DailyTrend(title={self.title}, traffic={self.traffic:,}, link={self.link})"
 
+'''
+Google Trends class - used to get realtime and daily search trends
+'''
 class GoogleTrends():
     def __init__(self):
         self.decoder = json.JSONDecoder()
@@ -80,7 +99,7 @@ class GoogleTrends():
     def _request(self, url, err_msg="ERROR"):
         res = requests.get(url)
         if res.status_code != 200:
-            print(f"[ {err_msg} ] - Code {res.status_code}")
+            raise(RuntimeError(f"[ {err_msg} ] - Code {res.status_code}"))
         
         data = res.content.decode()
         json_data = self._jsonify(data)
@@ -102,4 +121,20 @@ class GoogleTrends():
         
     def get_trend(self, id):
         json_data = self._request(self.trend_url(id), f"ERROR getting trend {id}")
-        return Trend(id, json_data)
+        return RealtimeTrend(id, json_data)
+
+
+    def daily_trends(self):
+        res = requests.get(daily_trend_url)
+        if (res.status_code != 200):
+            raise RuntimeError("ERROR getting daily trends from Google")
+        
+        soup = bs.BeautifulSoup(res.content, "xml")
+        items = soup.find_all('item')
+        searches = []
+        for item in items:
+            searches.append(DailyTrend(item.find('title').text, item.find('ht:approx_traffic').text, link=item.find("link").text))
+
+        searches.sort(key=lambda x: x.traffic, reverse=True)
+        return searches
+    
