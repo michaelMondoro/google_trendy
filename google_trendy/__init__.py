@@ -1,3 +1,4 @@
-from .googoo import Article
-from .googoo import GoogleTrends
-from .googoo import Trend
+from .google_trendy import Article
+from .google_trendy import GoogleTrends
+from .google_trendy import DailyTrend
+from .google_trendy import RealtimeTrend
