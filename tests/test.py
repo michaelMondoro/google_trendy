@@ -9,8 +9,6 @@ class GoogleTrendsTest(unittest.TestCase):
     def test_init(self):
         trends = GoogleTrends()
         self.assertIsNotNone(trends)
-
-
     
 
 if __name__ == '__main__':
