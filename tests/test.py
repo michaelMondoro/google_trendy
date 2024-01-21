@@ -10,6 +10,5 @@ class GoogleTrendsTest(unittest.TestCase):
         trends = GoogleTrends()
         self.assertIsNotNone(trends)
     
-
 if __name__ == '__main__':
     unittest.main()
