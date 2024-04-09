@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="google_trendy",
-    version="1.4",
+    version="1.5",
     author="Michael Mondoro",
     author_email="michaelmondoro@gmail.com",
     description="Package for getting and analyzing tending Google searches",
@@ -18,6 +18,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['bs4', 'requests'],
+    install_requires=['bs4', 'requests', 'lxml'],
     python_requires='>=3.7',
 )
