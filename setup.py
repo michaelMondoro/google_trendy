@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="google_trendy",
-    version="1.2",
+    version="1.3",
     author="Michael Mondoro",
     author_email="michaelmondoro@gmail.com",
     description="Package for getting and analyzing tending Google searches",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/michaelMondoro/the_weather",
+    url="https://github.com/michaelMondoro/google_trendy",
     packages=setuptools.find_packages(exclude="tests"),
     classifiers=[
         "Programming Language :: Python :: 3",
