@@ -5,7 +5,8 @@ import bs4 as bs
 
 explore_url = "https://trends.google.com/trends/explore?q=/m/02bh_v&date=now+7-d&geo=US"
 search_url = "https://trends.google.com/trends/api/realtimetrends?hl=en-US&tz=300&cat=all&fi=0&fs=0&geo=US&ri=10&rs=10&sort=0"
-daily_trend_url = "https://trends.google.com/trends/trendingsearches/daily/rss?geo=US"
+#daily_trend_url = "https://trends.google.com/trends/trendingsearches/daily/rss?geo=US"
+daily_trend_url = "https://trends.google.com/trending/rss"
 
 class RealtimeTrend():
     def __init__(self, id, trend_data):
