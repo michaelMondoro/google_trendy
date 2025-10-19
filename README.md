@@ -5,7 +5,7 @@
 [![Build](https://github.com/michaelMondoro/google_trendy/actions/workflows/publish_pypi.yml/badge.svg)](https://github.com/michaelMondoro/google_trendy/actions/workflows/publish_pypi.yml)
 
 ## Package
-Package for getting and analyzing tending Google searches
+Package for getting and analyzing trending Google searches
 
 ## Usage
 ```python
