@@ -100,7 +100,7 @@ class GoogleTrends():
 
     def get_trends(self):
         url="https://trends.google.com/_/TrendsUi/data/batchexecute?rpcids=i0OFE" 
-        data=f"f.req={quote('[[["i0OFE","[null,null,\\"US\\",0,\\"en\\",24,1]",null,"generic"]]]')}"
+        data=f"f.req={quote('[[[\"i0OFE\",\"[null,null,\\"US\\",0,\\"en\\",24,1]\",null,\"generic\"]]]')}"
         json_data = self._request(url, data)
         self.trends = []
         for trend in json_data:
