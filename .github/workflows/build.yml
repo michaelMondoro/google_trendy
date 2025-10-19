@@ -1,4 +1,4 @@
-name: Build
+name: google_trendy
 
 on:
   push:
