@@ -12,8 +12,8 @@ class GoogleTrendsTest(unittest.TestCase):
 
     def test_get_trends(self):
         trends = GoogleTrends()
-        trends.get_trends(5)
-        self.assertEqual(5, len(trends.trends))
+        trends.get_trends()
+        self.assertGreater(len(trends.trends), 0)
     
     def test_daily_trends(self):
         trends = GoogleTrends()
@@ -21,7 +21,7 @@ class GoogleTrendsTest(unittest.TestCase):
 
     def test_trend_urls(self):
         trends = GoogleTrends()
-        trends.get_trends(5)
+        trends.get_trends()
         for id in trends.trend_ids:
             self.assertIn("http", trends.trend_url(id))
 

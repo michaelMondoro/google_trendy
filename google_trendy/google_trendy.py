@@ -1,56 +1,18 @@
 import json
 import requests 
-from datetime import datetime
+from enum import Enum
+from datetime import datetime, timezone
 import bs4 as bs
+from urllib.parse import quote
+from dataclasses import dataclass
+from typing import Union
 
 explore_url = "https://trends.google.com/trends/explore?q=/m/02bh_v&date=now+7-d&geo=US"
-search_url = "https://trends.google.com/trends/api/realtimetrends?hl=en-US&tz=300&cat=all&fi=0&fs=0&geo=US&ri=10&rs=10&sort=0"
-#daily_trend_url = "https://trends.google.com/trends/trendingsearches/daily/rss?geo=US"
 daily_trend_url = "https://trends.google.com/trending/rss"
 
-class RealtimeTrend():
-    def __init__(self, id, trend_data):
-        self.id = id 
-        self.title = trend_data['title']
-        self.explore_links = ["https://trends.google.com" + link for link in trend_data['entityExploreLinks']]
-        self.entities = trend_data['entityNames']
-        self.time_range = trend_data['timeRange']
-        self.articles = self.get_articles(trend_data)
-
-        self.timeseries_data = self.get_bar_data(trend_data)
-
-    def start_date(self):
-        return datetime.fromtimestamp(self.timeseries_data['start']).strftime("%A, %B %d, %Y %I:%M %p")
-    
-    def end_date(self):
-        return datetime.fromtimestamp(self.timeseries_data['end']).strftime("%A, %B %d, %Y %I:%M %p")
-    
-    def get_articles(self, data):
-        articles = []
-        if 'articles' in data['widgets'][0]:
-            for article in data['widgets'][0]['articles']:
-                articles.append(Article(article))
-        
-        return articles
-    def get_bar_data(self, data):
-        num_articles = 0
-        start_time = None
-        end_time = None
-        if 'barData' in data['widgets'][1]:
-            bar_data = data['widgets'][1]['barData']
-            num_articles = bar_data[-1]['accumulative']
-            start_time = bar_data[0]['startTime']
-            end_time = bar_data[-1]['startTime']
-        return {"article_count": num_articles, "start":start_time, "end":end_time}
-
-    def __str__(self):
-        return f"Trend({self.id},[ {self.title} ],{self.time_range},{self.entities},{self.timeseries_data},{self.explore_links},{self.articles})"
-    def __repr__(self):
-        return f"Trend({self.id},{self.title},{self.time_range},{self.entities},{self.timeseries_data},{self.explore_links},{self.articles})"
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=False, indent=4)
-
+'''
+Website Article
+'''
 class Article():
     def __init__(self, data):
         self.title = data['title']
@@ -79,6 +41,35 @@ class DailyTrend:
     def __repr__(self):
         return f"DailyTrend(title={self.title}, traffic={self.traffic:,}, link={self.link})"
 
+
+class TrendIndex(Enum):
+    TITLE = 0
+    START = 3
+    END = 4
+    VOLUME = 6
+    PERC_CHANGE = 8
+    SIMILAR = 9
+    ARTICLES = 11
+
+@dataclass
+class GTrend:
+    title: str
+    start: Union[int, float] 
+    end: Union[int, float] 
+    volume: int
+    perc_change: int 
+    similar: list[str] 
+    articles: list 
+    start_date: datetime = None 
+    end_date: datetime = None 
+
+    def __post_init__(self):
+        self.start_date = datetime.fromtimestamp(self.start, tz=timezone.utc) if self.start is not None else None
+        self.end_date = datetime.fromtimestamp(self.end, tz=timezone.utc) if self.end is not None else None
+
+    def __repr__(self):
+        return f"GTrend(title={self.title!r}, volume={self.volume}, start={self.start_date.strftime('%Y-%m-%d %H:%M')})"
+
 '''
 Google Trends class - used to get realtime and daily search trends
 '''
@@ -89,40 +80,43 @@ class GoogleTrends():
         self.trend_ids = []
         self.entities = set([])
 
-    def trend_url(self, id):
-        return f"https://trends.google.com/trends/api/stories/{id}?hl=en-US&tz=300"
-
     def _jsonify(self, data):
         data = data.split('\n')[1]
         json_data = self.decoder.decode(data)
         return json_data
 
-    def _request(self, url, err_msg="ERROR"):
-        res = requests.get(url)
-        if res.status_code != 200:
-            raise(RuntimeError(f"[ {err_msg} ] - Code {res.status_code}"))
+    def _request(self, url, data):
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        }
         
-        data = res.content.decode()
-        json_data = self._jsonify(data)
+        res = requests.post(url, data=data, headers=headers)
+        res.raise_for_status()
+        
+        text = res.content.decode('utf-8')
+        cleaned = text.lstrip(")]}'\n")
+        json_data = json.loads(json.loads(cleaned)[0][2])[1]
         return json_data
 
-    def get_trends(self, num):
-        json_data = self._request(f"https://trends.google.com/trends/api/realtimetrends?hl=en-US&tz=300&cat=all&fi=0&fs=0&geo=US&ri={num}&rs={num}&sort=0", "ERROR initiating trend search")
+    def get_trends(self):
+        url="https://trends.google.com/_/TrendsUi/data/batchexecute?rpcids=i0OFE" 
+        data=f"f.req={quote('[[["i0OFE","[null,null,\\"US\\",0,\\"en\\",24,1]",null,"generic"]]]')}"
+        json_data = self._request(url, data)
         self.trends = []
-        # This only grabs top stories? Doesn't include the full 'num' requested
-        # for trend in json_data['storySummaries']['trendingStories']:
-        #     self.trends.append(self.get_trend(trend['id']))
-        self.trend_ids = json_data['trendingStoryIds']
-        for trend_id in self.trend_ids:
-            trend = self.get_trend(trend_id)
-            self.trends.append(trend)
-            self.entities = self.entities.union(set(trend.entities))
+        for trend in json_data:
+            start = trend[TrendIndex.START.value][0] if trend[TrendIndex.START.value]is not None else None
+            end = trend[TrendIndex.END.value][0] if trend[TrendIndex.END.value]is not None else None
+            self.trends.append(GTrend(
+                trend[TrendIndex.TITLE.value],
+                start, 
+                end,
+                trend[TrendIndex.VOLUME.value],
+                trend[TrendIndex.PERC_CHANGE.value],
+                trend[TrendIndex.SIMILAR.value],
+                trend[TrendIndex.ARTICLES.value]))
         
-        self.trends.sort(key=lambda x: x.timeseries_data['article_count'], reverse=True)
-        
-    def get_trend(self, id):
-        json_data = self._request(self.trend_url(id), f"ERROR getting trend {id}")
-        return RealtimeTrend(id, json_data)
+        self.trends.sort(key=lambda x: x.volume, reverse=True)
+        return self.trends
 
 
     def daily_trends(self):
